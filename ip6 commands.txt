@@ -1,0 +1,106 @@
+#!/bin/bash
+
+ip -6 addr add a:b:c:d::1234/128 dev eth0
+ip -6 route add a:b:c:d::1 dev eth0
+ip -6 route add default via a:b:c:d::1 dev eth0
+
+ip -6 route
+
+###########
+
+Disable ipv6
+
+#!/bin/sh
+sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sudo sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+
+=====================
+
+
+linux-get-ipv6-address.sh
+sudo ip addr show dev enp1s0f2 | sed -e's/^.*inet6 \([^ ]*\)\/.*$/\1/;t
+
+=================
+
+ipv6tunnel.sh
+
+#!/bin/bash
+old_ip=$(cat last_ip)
+ip=$(dig +short googlerocks.dyndns.org)
+echo $ip > last_ip
+
+if [ "$ip" = "$old_ip" ]; then
+    echo "nothing to do"
+else
+    echo "updating tunnel"
+    ip tunnel del v6-tunnel
+    ip tunnel add v6-tunnel mode sit remote $ip local 176.9.43.248 ttl 255
+    ip link set v6-tunnel up
+    ip addr add 2a01:4f8:150:54e3:abcd::1/80 dev v6-tunnel
+    ip route add 2a01:4f8:150:5ff5::/64 dev v6-tunnel
+    ip -f inet6 addr
+fi
+exit
+
+=======================
+
+nmcli connection add \            
+        type ip-tunnel ifname he-sit \
+        mode sit remote 66.220.18.42 -- \
+        ipv4.method disabled ipv6.method manual \
+        ipv6.address 2001:470:c:2c3::2/64 \
+        ipv6.gateway 2001:470:c:2c3::1
+
+wget -O /dev/null https://$USER:$PASSWD@ipv4.tunnelbroker.net/nic/update?hostname=$TUNNEL_ID
+
+================
+
+function check_ipv6() {
+        # Lets see if we got an IPv6, which in return means that we're live
+        IPv6=`curl -6 -s https://wtfismyip.com/text`
+        if [ $IPv6 ]
+        then
+                # OK IPv6 was found, return code 0 - OK
+                echo "OK - IPv6 connection ESTABLISHED. IP: $IPv6"
+                exit 0
+        else
+                # Error: IPv6 was not found, return code 2 - critical
+                echo "CRITICAL - no IPv6 connection ESTABLISHED. Output: $IPv6"
+                exit 1
+        fi
+}
+check_ipv6
+eof
+
+=========================
+
+ip
+Show / manipulate routing, devices, policy routing and tunnels.
+
+List interfaces with detailed info:
+ip address
+
+List interfaces with brief network layer info:
+ip -brief address
+
+List interfaces with brief link layer info:
+ip -brief link
+
+Display the routing table:
+ip route
+
+Show neighbors (ARP table):
+ip neighbour
+
+Make an interface up/down:
+ip link set {{interface}} up/down
+
+Add/Delete an ip address to an interface:
+ip addr add/del {{ip}}/{{mask}} dev {{interface}}
+
+Add a default route:
+ip route add default via {{ip}} dev {{interface}}
+
+=====================
+
